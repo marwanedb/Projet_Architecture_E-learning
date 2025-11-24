@@ -9,6 +9,13 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      routes:
+        - id: student-service-route
+          uri: lb://STUDENT-SERVICE  # <--- TRY UPPERCASE HERE
+          predicates:
+            - Path=/student-service/**
+          filters:
+            - StripPrefix=1
 eureka:
   client:
     service-url:
