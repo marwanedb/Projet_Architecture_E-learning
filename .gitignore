@@ -7,6 +7,7 @@ target/
 .project
 .settings
 .idea
+uploads
 *.iml
 *.log
 .DS_Store

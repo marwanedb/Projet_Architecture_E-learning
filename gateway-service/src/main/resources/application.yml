@@ -35,6 +35,27 @@ spring:
             - Path=/auth-service/**
           filters:
             - StripPrefix=1
+
+        - id: professor-service-route
+          uri: lb://PROFESSOR-SERVICE
+          predicates:
+            - Path=/professor-service/**
+          filters:
+            - StripPrefix=1
+
+        - id: catalog-service-route
+          uri: lb://CATALOG-SERVICE
+          predicates:
+            - Path=/catalog-service/**
+          filters:
+            - StripPrefix=1
+
+        - id: learning-service-route
+          uri: lb://LEARNING-SERVICE
+          predicates:
+            - Path=/learning-service/**
+          filters:
+            - StripPrefix=1
 eureka:
   client:
     service-url:
