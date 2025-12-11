@@ -1,41 +1,43 @@
 package e_learning.learning_service.controllers;
 
-
-import e_learning.learning_service.clients.CourseRestClient;
-import e_learning.learning_service.entities.Enrollment;
-import e_learning.learning_service.repositories.EnrollmentRepository;
+import e_learning.learning_service.dto.EnrollmentRequest;
+import e_learning.learning_service.dto.EnrollmentResponse;
+import e_learning.learning_service.services.EnrollmentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/enrollments")
+@Tag(name = "Enrollments", description = "Course enrollment management")
 public class EnrollmentController {
 
-    private final EnrollmentRepository enrollmentRepository;
-    private final CourseRestClient courseRestClient; // Injection du client Feign
+    private final EnrollmentService enrollmentService;
 
-    public EnrollmentController(EnrollmentRepository enrollmentRepository, CourseRestClient courseRestClient) {
-        this.enrollmentRepository = enrollmentRepository;
-        this.courseRestClient = courseRestClient;
+    public EnrollmentController(EnrollmentService enrollmentService) {
+        this.enrollmentService = enrollmentService;
     }
 
     @PostMapping
-    public Enrollment enrollStudent(@RequestBody Enrollment enrollment) {
-        // 1. Vérifier si le cours existe via l'appel réseau (Microservice à Microservice)
-        // Si le cours n'existe pas, Feign lancera une erreur 404
-        Object course = courseRestClient.getCourseById(enrollment.getCourseId());
-
-        // 2. Si OK, on sauvegarde
-        enrollment.setEnrollmentDate(LocalDate.now());
-        return enrollmentRepository.save(enrollment);
+    @Operation(summary = "Enroll a student in a course")
+    public ResponseEntity<EnrollmentResponse> enrollStudent(@Valid @RequestBody EnrollmentRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(enrollmentService.enrollStudent(request));
     }
 
     @GetMapping("/{id}")
-    public Enrollment getEnrollment(@PathVariable Long id) {
-        Enrollment enrollment = enrollmentRepository.findById(id).orElseThrow();
-        // On enrichit l'objet avec les détails du cours récupérés en temps réel
-        enrollment.setCourseDetails(courseRestClient.getCourseById(enrollment.getCourseId()));
-        return enrollment;
+    @Operation(summary = "Get enrollment details by ID")
+    public ResponseEntity<EnrollmentResponse> getEnrollment(@PathVariable Long id) {
+        return ResponseEntity.ok(enrollmentService.getEnrollmentById(id));
+    }
+
+    @GetMapping("/student/{studentId}")
+    @Operation(summary = "Get all enrollments for a student")
+    public ResponseEntity<List<EnrollmentResponse>> getStudentEnrollments(@PathVariable Long studentId) {
+        return ResponseEntity.ok(enrollmentService.getStudentEnrollments(studentId));
     }
 }

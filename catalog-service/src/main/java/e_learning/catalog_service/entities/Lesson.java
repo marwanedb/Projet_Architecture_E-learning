@@ -1,25 +1,36 @@
 package e_learning.catalog_service.entities;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "lessons")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Lesson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
 
-    // Type de contenu : "VIDEO", "PDF", "QUIZ"
-    private String type;
+    private String description;
 
-    // L'URL (Youtube ou lien fichier)
+    @Enumerated(EnumType.STRING)
+    private LessonType type;
+
     private String url;
+
+    private Integer durationMinutes;
+
+    private Integer orderIndex;
 
     @ManyToOne
     @JoinColumn(name = "module_id")
-    @JsonIgnore // <--- TRÈS IMPORTANT : Évite la boucle infinie en JSON
+    @JsonIgnore
     private Module module;
 }

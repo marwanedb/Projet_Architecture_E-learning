@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 // name = nom du service dans Eureka (INSENSIBLE À LA CASSE ICI)
-@FeignClient(name = "catalog-service")
+@FeignClient(name = "catalog-service",contextId = "CourseRestClient")
 public interface CourseRestClient {
 
     // On définit juste la signature de la méthode qu'on veut appeler

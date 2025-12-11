@@ -1,5 +1,6 @@
 server:
   port: 8080
+
 spring:
   application:
     name: gateway-service
@@ -19,20 +20,26 @@ spring:
               - POST
               - PUT
               - DELETE
+              - OPTIONS
             allowedHeaders: "*"
+            exposedHeaders:
+              - Authorization
+              - X-User-Id
+              - X-User-Email
+              - X-User-Role
       # ------------------------------------
       routes:
-        - id: student-service-route
-          uri: lb://STUDENT-SERVICE
-          predicates:
-            - Path=/student-service/**
-          filters:
-            - StripPrefix=1
-
         - id: auth-service-route
           uri: lb://AUTH-SERVICE
           predicates:
             - Path=/auth-service/**
+          filters:
+            - StripPrefix=1
+
+        - id: student-service-route
+          uri: lb://STUDENT-SERVICE
+          predicates:
+            - Path=/student-service/**
           filters:
             - StripPrefix=1
 
@@ -56,7 +63,25 @@ spring:
             - Path=/learning-service/**
           filters:
             - StripPrefix=1
+
+        - id: admin-service-route
+          uri: lb://ADMIN-SERVICE
+          predicates:
+            - Path=/admin-service/**
+          filters:
+            - StripPrefix=1
+
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+# JWT Configuration (must match auth-service)
+jwt:
+  secret: your-256-bit-secret-key-here-make-it-long-and-secure-for-production
+
+# Logging
+logging:
+  level:
+    e_learning.gateway_service: DEBUG
+    org.springframework.cloud.gateway: DEBUG

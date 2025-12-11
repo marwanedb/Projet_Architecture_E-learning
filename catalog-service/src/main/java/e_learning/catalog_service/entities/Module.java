@@ -6,20 +6,32 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "modules")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Module {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
+
     private String description;
+
+    private Integer orderIndex;
 
     @ManyToOne
     @JoinColumn(name = "course_id")
-    @JsonIgnore // Évite que le Module renvoie tout le Cours en JSON
+    @JsonIgnore
     private Course course;
 
-    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
     private List<Lesson> lessons;
+
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Quiz> quizzes;
 }

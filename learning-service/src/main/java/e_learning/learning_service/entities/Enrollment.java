@@ -2,22 +2,38 @@ package e_learning.learning_service.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "enrollments", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "studentId", "courseId" })
+})
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long studentId;
+
+    @Column(nullable = false)
     private Long courseId;
 
-    private LocalDate enrollmentDate;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EnrollmentStatus status;
 
-    // On ne stocke pas tout le cours, juste son ID.
-    // Mais on peut avoir un champ non-persistant pour l'affichage (Transient)
-    @Transient
-    private Object courseDetails;
+    @Builder.Default
+    private Double progress = 0.0;
+
+    @Builder.Default
+    private LocalDateTime enrolledAt = LocalDateTime.now();
+
+    private LocalDateTime completedAt;
+
+    private LocalDateTime lastAccessedAt;
 }
