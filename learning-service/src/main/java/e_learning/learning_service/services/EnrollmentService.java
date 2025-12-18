@@ -105,4 +105,42 @@ public class EnrollmentService {
                 .completedAt(enrollment.getCompletedAt())
                 .build();
     }
+
+    @Transactional
+    public void cancelEnrollment(Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new EnrollmentNotFoundException(enrollmentId));
+
+        // Can only cancel if no progress has been made
+        if (enrollment.getProgress() > 0) {
+            throw new IllegalStateException("Cannot cancel enrollment with progress. Use drop instead.");
+        }
+
+        enrollment.setStatus(EnrollmentStatus.CANCELLED);
+        enrollmentRepository.save(enrollment);
+    }
+
+    @Transactional
+    public EnrollmentResponse dropCourse(Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new EnrollmentNotFoundException(enrollmentId));
+
+        if (enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot drop a completed course.");
+        }
+
+        if (enrollment.getStatus() == EnrollmentStatus.CANCELLED ||
+                enrollment.getStatus() == EnrollmentStatus.DROPPED) {
+            throw new IllegalStateException("Enrollment is already cancelled or dropped.");
+        }
+
+        enrollment.setStatus(EnrollmentStatus.DROPPED);
+        enrollment = enrollmentRepository.save(enrollment);
+        return mapToResponse(enrollment, true);
+    }
+
+    public boolean isEnrolled(Long studentId, Long courseId) {
+        return enrollmentRepository.existsByStudentIdAndCourseIdAndStatus(
+                studentId, courseId, EnrollmentStatus.ACTIVE);
+    }
 }

@@ -58,6 +58,16 @@ public class StudentController {
         return ResponseEntity.ok(studentService.getStudentByAuthId(authId));
     }
 
+    @GetMapping("/me")
+    @Operation(summary = "Get current student's profile (uses X-User-Id header from gateway)")
+    public ResponseEntity<StudentResponse> getCurrentStudent(
+            @RequestHeader(value = "X-User-Id", required = false) Long authId) {
+        if (authId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(studentService.getStudentByAuthId(authId));
+    }
+
     @GetMapping("/email/{email}")
     @Operation(summary = "Get a student by email")
     public ResponseEntity<StudentResponse> getStudentByEmail(@PathVariable String email) {

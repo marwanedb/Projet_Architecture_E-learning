@@ -11,6 +11,7 @@ import e_learning.catalog_service.exceptions.ResourceNotFoundException;
 import e_learning.catalog_service.repositories.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,12 @@ public class ContentController {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
+
+    @Value("${upload.path:./uploads/}")
+    private String uploadPath;
+
+    @Value("${upload.base-url:http://localhost:8085/uploads/}")
+    private String uploadBaseUrl;
 
     public ContentController(CourseRepository courseRepository, ModuleRepository moduleRepository,
             LessonRepository lessonRepository, QuizRepository quizRepository,
@@ -284,17 +291,17 @@ public class ContentController {
     // ==================== UTILITY ====================
 
     private String saveFile(MultipartFile file) throws IOException {
-        String uploadDir = "uploads/";
-        Path uploadPath = Paths.get(uploadDir);
+        Path uploadDir = Paths.get(uploadPath);
 
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
         }
 
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path filePath = uploadPath.resolve(fileName);
+        Path filePath = uploadDir.resolve(fileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return uploadDir + fileName;
+        // Return full URL that's accessible from frontend
+        return uploadBaseUrl + fileName;
     }
 }

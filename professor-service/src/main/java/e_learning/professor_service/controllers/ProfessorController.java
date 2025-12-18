@@ -58,6 +58,16 @@ public class ProfessorController {
         return ResponseEntity.ok(professorService.getProfessorByAuthId(authId));
     }
 
+    @GetMapping("/me")
+    @Operation(summary = "Get current professor's profile (uses X-User-Id header from gateway)")
+    public ResponseEntity<ProfessorResponse> getCurrentProfessor(
+            @RequestHeader(value = "X-User-Id", required = false) Long authId) {
+        if (authId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(professorService.getProfessorByAuthId(authId));
+    }
+
     @GetMapping("/{id}/courses")
     @Operation(summary = "Get courses taught by professor")
     public ResponseEntity<List<Object>> getProfessorCourses(@PathVariable Long id) {

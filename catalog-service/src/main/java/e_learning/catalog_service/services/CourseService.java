@@ -236,4 +236,17 @@ public class CourseService {
                 .questionCount(quiz.getQuestions() != null ? quiz.getQuestions().size() : 0)
                 .build();
     }
+
+    public int getTotalLessonCount(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
+
+        if (course.getModules() == null) {
+            return 0;
+        }
+
+        return course.getModules().stream()
+                .mapToInt(module -> module.getLessons() != null ? module.getLessons().size() : 0)
+                .sum();
+    }
 }

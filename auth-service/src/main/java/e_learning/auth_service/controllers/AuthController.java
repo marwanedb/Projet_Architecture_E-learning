@@ -19,9 +19,15 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    @Operation(summary = "Register a new user")
+    @Operation(summary = "Register a new user (auth only, no profile)")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
+    }
+
+    @PostMapping("/register-full")
+    @Operation(summary = "Register a new user with complete profile (recommended for frontend)")
+    public ResponseEntity<FullRegistrationResponse> registerFull(@Valid @RequestBody FullRegistrationRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerFull(request));
     }
 
     @PostMapping("/login")
@@ -36,11 +42,32 @@ public class AuthController {
         return ResponseEntity.ok(authService.refreshToken(request));
     }
 
-    @PostMapping("/logout/{userId}")
-    @Operation(summary = "Logout user and invalidate refresh token")
-    public ResponseEntity<Void> logout(@PathVariable Long userId) {
+    @PostMapping("/logout")
+    @Operation(summary = "Logout user and invalidate refresh token (uses X-User-Id header from gateway)")
+    public ResponseEntity<Void> logout(@RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         authService.logout(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/logout/{userId}")
+    @Operation(summary = "Logout user by ID (deprecated, use POST /logout instead)")
+    @Deprecated
+    public ResponseEntity<Void> logoutByPath(@PathVariable Long userId) {
+        authService.logout(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Get current authenticated user info (uses X-User-Id header from gateway)")
+    public ResponseEntity<UserResponse> getCurrentUser(
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(authService.getUserById(userId));
     }
 
     @GetMapping("/users/{id}")
@@ -66,5 +93,21 @@ public class AuthController {
     public ResponseEntity<Void> lockUser(@PathVariable Long id, @RequestParam boolean locked) {
         authService.lockUser(id, locked);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Request a password reset token")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String token = authService.forgotPassword(request);
+        // In production, this would send an email and return a success message
+        // For academic purposes, we return the token directly
+        return ResponseEntity.ok("Password reset token: " + token);
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Reset password using token")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok("Password reset successful");
     }
 }

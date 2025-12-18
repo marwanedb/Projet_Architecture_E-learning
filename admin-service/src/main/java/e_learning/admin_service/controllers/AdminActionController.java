@@ -23,7 +23,7 @@ public class AdminActionController {
     @PutMapping("/users/{userId}/lock")
     @Operation(summary = "Lock/Unlock a user account")
     public ResponseEntity<Void> lockUser(
-            @RequestHeader("X-Admin-Id") Long adminId, // In real world extracted from JWT
+            @RequestHeader(value = "X-User-Id", required = false) Long adminId,
             @PathVariable Long userId,
             @RequestParam boolean locked) {
 

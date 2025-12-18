@@ -40,4 +40,31 @@ public class EnrollmentController {
     public ResponseEntity<List<EnrollmentResponse>> getStudentEnrollments(@PathVariable Long studentId) {
         return ResponseEntity.ok(enrollmentService.getStudentEnrollments(studentId));
     }
+
+    @GetMapping("/course/{courseId}")
+    @Operation(summary = "Get all enrollments for a course")
+    public ResponseEntity<List<EnrollmentResponse>> getCourseEnrollments(@PathVariable Long courseId) {
+        return ResponseEntity.ok(enrollmentService.getCourseEnrollments(courseId));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Cancel an enrollment (before course started)")
+    public ResponseEntity<Void> cancelEnrollment(@PathVariable Long id) {
+        enrollmentService.cancelEnrollment(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/drop")
+    @Operation(summary = "Drop a course (after course started)")
+    public ResponseEntity<EnrollmentResponse> dropCourse(@PathVariable Long id) {
+        return ResponseEntity.ok(enrollmentService.dropCourse(id));
+    }
+
+    @GetMapping("/check")
+    @Operation(summary = "Check if student is enrolled in a course")
+    public ResponseEntity<Boolean> isEnrolled(
+            @RequestParam Long studentId,
+            @RequestParam Long courseId) {
+        return ResponseEntity.ok(enrollmentService.isEnrolled(studentId, courseId));
+    }
 }

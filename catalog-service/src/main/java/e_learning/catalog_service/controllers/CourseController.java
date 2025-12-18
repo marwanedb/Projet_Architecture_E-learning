@@ -116,4 +116,10 @@ public class CourseController {
     public ResponseEntity<CourseResponse> archiveCourse(@PathVariable Long id) {
         return ResponseEntity.ok(courseService.archiveCourse(id));
     }
+
+    @GetMapping("/{id}/lesson-count")
+    @Operation(summary = "Get total lesson count for a course")
+    public ResponseEntity<Integer> getTotalLessonCount(@PathVariable Long id) {
+        return ResponseEntity.ok(courseService.getTotalLessonCount(id));
+    }
 }

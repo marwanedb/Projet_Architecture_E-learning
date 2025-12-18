@@ -1,6 +1,7 @@
 package e_learning.learning_service.repositories;
 
 import e_learning.learning_service.entities.Enrollment;
+import e_learning.learning_service.entities.EnrollmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
@@ -13,4 +14,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByCourseId(Long courseId);
 
     boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
+
+    boolean existsByStudentIdAndCourseIdAndStatus(Long studentId, Long courseId, EnrollmentStatus status);
 }
